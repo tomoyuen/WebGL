@@ -8,6 +8,7 @@
 </head>
 <body>
   <canvas id="glCanvas" width="640" height="480"></canvas>
+  <script src="https://mdn.github.io/webgl-examples/tutorial/gl-matrix.js"></script>
   <script>
     // preparing the WebGL context
     function main() {
@@ -33,6 +34,10 @@
           modelViewMatrix: gl.getUniformLocation(shaderProgram, 'uModelViewMatrix'),
         }
       }
+
+      const buffers = initBuffers(gl);
+
+      drawScene(gl, programInfo, buffers);
     }
 
     window.onload = main;
@@ -101,7 +106,7 @@
       const positionBuffer = gl.createBuffer();
 
       // select the positionBuffer as the one to apply buffer operations to from here out.
-      fl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
+      gl.bindBuffer(gl.ARRAY_BUFFER, positionBuffer);
 
       // now create an array of positions for the square.
       const positions = [
@@ -113,7 +118,7 @@
 
       // now pass the list of positions into WebGL to build the shape.
       // We do this by creating a Float32Array from the JavaScript array, then use it to fill the current buffer.
-      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), fl.STATIC_DRAW);
+      gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(positions), gl.STATIC_DRAW);
 
       return {
         position: positionBuffer,
@@ -169,6 +174,27 @@
           offset
         );
         gl.enableVertexAttribArray(programInfo.attribLocations.vertexPosition);
+      }
+
+      // tell WebGL to use our program when drawing
+      gl.useProgram(programInfo.program);
+
+      // set the shader uniforms
+      gl.uniformMatrix4fv(
+        programInfo.uniformLocations.projectionMatrix,
+        false,
+        projectionMatrix
+      );
+      gl.uniformMatrix4fv(
+        programInfo.uniformLocations.modelViewMatrix,
+        false,
+        modelViewMatrix
+      );
+
+      {
+        const offset = 0;
+        const vertexCount = 4;
+        gl.drawArrays(gl.TRIANGLE_STRIP, offset, vertexCount);
       }
     }
   </script>
