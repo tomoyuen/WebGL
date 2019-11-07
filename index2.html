@@ -42,157 +42,70 @@
   <script id="vertex-shader" type="x-shader/x-vertex">
     // Each point has a position and color
     attribute vec3 position;
-    attribute vec4 color;
+    // attribute vec4 color;
 
     // The transformation matrices
-    uniform mat4 model;
-    uniform mat4 view;
-    uniform mat4 projection;
+    // uniform mat4 model;
+    // uniform mat4 view;
+    // uniform mat4 projection;
 
     // Pass the color attribute down to the fragment shader
-    varying vec4 vColor;
+    // varying vec4 vColor;
 
     void main() {
       // Pass the color down to the fragment shader
-      vColor = color;
+      // vColor = color;
 
       // Read the multiplication in reverse order, the point is taken from the original model space and moved into world space.
       // It's the projected into clip space as a homogeneous point. Generally the W value will be something other than 1 at the end of
       // it.
-      gl_Position = projection * view * model * vec4(position, 1.0);
+      gl_Position = vec4(position, 1.0);
+      // gl_Position = projection * view * model * vec4(position, 1.0);
     }
   </script>
 
   <!-- The fragment shader determines the color of the final pixel by setting gl_FragColor -->
   <script id="fragment-shader" type="x-shader/x-fragment">
     precision mediump float;
-    varying vec4 vColor;
+    // varying vec4 vColor;
+    uniform vec4 vColor;
 
     void main() {
       gl_FragColor = vColor;
     }
   </script>
 
-  <script type="module" src="./MDN.js"></script>
+  <!-- <script type="module" src="./animate-cube.js"></script> -->
   <script type="module">
-    import MDN from './MDN.js';
+    import Box from './Box.js';
 
-    class CubeDemo {
-      constructor() {
-        // Prep the canvas
-        this.canvas = document.getElementById('canvas');
-        this.canvas.width = window.innerWidth;
-        this.canvas.height = window.innerHeight;
+    const box = new Box();
+    box.draw({
+      top: 0.5,
+      bottom: -0.5,
+      left: -0.5,
+      right: 0.5,
+      depth: 0,
+      color: [1, 0.4, 0.4, 1] // red
+    });
 
-        // Grab a context
-        this.gl = MDN.createContext(this.canvas);
+    box.draw({
+      top: 0.9,
+      bottom: 0,
+      left: -0.9,
+      right: 0.9,
+      depth: 0.5,
+      color: [0.4, 1, 0.4, 1] // green
+    });
 
-        this.transforms = {}; // all of the matrix tranforms
-        this.locations = {}; // all of the shader locations
-
-        // get the rest going
-        this.buffers = MDN.createBuffersForCube(this.gl, MDN.createCubeData());
-        this.webglProgram = this.setupProgram();
-      }
-      setupProgram() {
-        const gl = this.gl;
-
-        // setup a webgl program
-        const webglProgram = MDN.createWebGLProgramFromIds(gl, 'vertex-shader', 'fragment-shader');
-        gl.useProgram(webglProgram);
-
-        // save the attribute and uniform locations
-        this.locations.model = gl.getUniformLocation(webglProgram, 'model');
-        this.locations.view = gl.getUniformLocation(webglProgram, 'view');
-        this.locations.projection = gl.getUniformLocation(webglProgram, 'projection');
-        this.locations.position = gl.getAttribLocation(webglProgram, 'position');
-        this.locations.color = gl.getAttribLocation(webglProgram, 'color');
-
-        // tell webgl to test the depth when drawing
-        gl.enable(gl.DEPTH_TEST);
-
-        return webglProgram;
-      }
-      computePerspectiveMatrix() {
-        const fieldOfViewInRadians = Math.PI * 0.5;
-        const aspectRatio = window.innerWidth / window.innerHeight;
-        const nearClippingPlaneDistance = 1;
-        const farClippingPlaneDistance = 50;
-
-        this.transforms.projection = MDN.perspectiveMatrix(
-          fieldOfViewInRadians,
-          aspectRatio,
-          nearClippingPlaneDistance,
-          farClippingPlaneDistance
-        );
-      }
-      computeViewMatrix(now) {
-        const zoomInAndOut = 5 * Math.sin(now * 0.002);
-
-        // move slightly down
-        const position = MDN.translateMatrix(0, 0, -20 + zoomInAndOut);
-
-        // multiply together, make sure and read them in opposite order
-        this.transforms.view = position;
-      }
-      computeModelMatrix(row) {
-        // scale up
-        const scale = MDN.scaleMatrix(5, 5, 5);
-
-        // rotate a slight tilt
-        const rotateX = MDN.rotateXMatrix(Math.PI * 0.2);
-
-        // rotate according to time
-        const rotateY = MDN.rotateYMatrix(Math.PI * 0.2);
-
-        // move slightly down
-        const position = MDN.translateMatrix(0, 0, 0);
-
-        // multiply together, make sure and read them in opposite order
-        this.transforms.model = MDN.multiplyArrayOfMatrices([position, rotateX, rotateY, scale]);
-      }
-      draw() {
-        const gl = this.gl;
-        const now = Date.now();
-
-        // compute our matrices
-        this.computeModelMatrix(now);
-        this.computeViewMatrix(now);
-        this.computePerspectiveMatrix(0.5);
-
-        // update the data going to the GPU
-        this.updateAttributesAndUniforms();
-
-        gl.drawElements(gl.TRIANGLES, 36, gl.UNSIGNED_SHORT, 0);
-
-        // run the draw as a loop
-        requestAnimationFrame(this.draw.bind(this));
-      }
-      updateAttributesAndUniforms() {
-        const gl = this.gl;
-
-        // setup the color uniform that will be shared across all triangles
-        gl.uniformMatrix4fv(this.locations.model, false, new Float32Array(this.transforms.model));
-        gl.uniformMatrix4fv(this.locations.projection, false, new Float32Array(this.transforms.projection));
-        gl.uniformMatrix4fv(this.locations.view, false, new Float32Array(this.transforms.view));
-
-        // set the positions attribute
-        gl.enableVertexAttribArray(this.locations.position);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.positions);
-        gl.vertexAttribPointer(this.locations.position, 3, gl.FLOAT, false, 0, 0);
-
-        // set the colors attribute
-        gl.enableVertexAttribArray(this.locations.color);
-        gl.bindBuffer(gl.ARRAY_BUFFER, this.buffers.colors);
-        gl.vertexAttribPointer(this.locations.color, 4, gl.FLOAT, false, 0, 0);
-
-        gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.elements);
-      }
-    }
-
-    const cube = new CubeDemo();
-
-    cube.draw();
+    box.draw({
+      top: 1,
+      bottom: -1,
+      left: -1,
+      right: 1,
+      depth: 0.8,
+      color: [0.4, 0.4, 1, 1] // blue
+    });
   </script>
 </body>
 </html>
