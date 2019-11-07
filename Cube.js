@@ -1,6 +1,6 @@
 import MDN from './MDN.js';
 
-class CubeDemo {
+export default class CubeDemo {
   constructor() {
     // Prep the canvas
     this.canvas = document.getElementById('canvas');
@@ -112,7 +112,3 @@ class CubeDemo {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.buffers.elements);
   }
 }
-
-const cube = new CubeDemo();
-
-cube.draw();

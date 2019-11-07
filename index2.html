@@ -41,42 +41,49 @@
   <!-- The vertex shader operates on individual vertices in our model data by setting gl_Position -->
   <script id="vertex-shader" type="x-shader/x-vertex">
     // Each point has a position and color
-    attribute vec4 position;
-    // attribute vec4 color;
+    attribute vec3 position;
+    attribute vec4 color;
 
     // The transformation matrices
-    // uniform mat4 model;
-    // uniform mat4 view;
-    // uniform mat4 projection;
+    uniform mat4 model;
+    uniform mat4 view;
+    uniform mat4 projection;
 
     // Pass the color attribute down to the fragment shader
-    // varying vec4 vColor;
+    varying vec4 vColor;
 
     void main() {
       // Pass the color down to the fragment shader
-      // vColor = color;
+      vColor = color;
 
       // Read the multiplication in reverse order, the point is taken from the original model space and moved into world space.
       // It's the projected into clip space as a homogeneous point. Generally the W value will be something other than 1 at the end of
       // it.
-      gl_Position = position;
-      // gl_Position = projection * view * model * vec4(position, 1.0);
+      // gl_Position = model * position;
+      gl_Position = projection * view * model * vec4(position, 1.0);
     }
   </script>
 
   <!-- The fragment shader determines the color of the final pixel by setting gl_FragColor -->
   <script id="fragment-shader" type="x-shader/x-fragment">
     precision mediump float;
-    // varying vec4 vColor;
-    uniform vec4 vColor;
+    varying vec4 vColor;
+    // uniform vec4 vColor;
 
     void main() {
       gl_FragColor = vColor;
     }
   </script>
 
-  <!-- <script type="module" src="./animate-cube.js"></script> -->
   <script type="module">
+    import Cube from './Cube.js';
+
+    const cube = new Cube();
+
+    cube.draw();
+  </script>
+
+  <!-- <script type="module">
     import Box from './Box.js';
 
     const box = new Box();
@@ -109,6 +116,6 @@
       depth: -1.5,
       color: [0.4, 0.4, 1, 1] // blue
     });
-  </script>
+  </script> -->
 </body>
 </html>
