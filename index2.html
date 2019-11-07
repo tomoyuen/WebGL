@@ -41,7 +41,7 @@
   <!-- The vertex shader operates on individual vertices in our model data by setting gl_Position -->
   <script id="vertex-shader" type="x-shader/x-vertex">
     // Each point has a position and color
-    attribute vec3 position;
+    attribute vec4 position;
     // attribute vec4 color;
 
     // The transformation matrices
@@ -59,7 +59,7 @@
       // Read the multiplication in reverse order, the point is taken from the original model space and moved into world space.
       // It's the projected into clip space as a homogeneous point. Generally the W value will be something other than 1 at the end of
       // it.
-      gl_Position = vec4(position, 1.0);
+      gl_Position = position;
       // gl_Position = projection * view * model * vec4(position, 1.0);
     }
   </script>
@@ -85,6 +85,7 @@
       bottom: -0.5,
       left: -0.5,
       right: 0.5,
+      w: 0.7,
       depth: 0,
       color: [1, 0.4, 0.4, 1] // red
     });
@@ -94,6 +95,7 @@
       bottom: 0,
       left: -0.9,
       right: 0.9,
+      w: 1.1,
       depth: 0.5,
       color: [0.4, 1, 0.4, 1] // green
     });
@@ -103,7 +105,8 @@
       bottom: -1,
       left: -1,
       right: 1,
-      depth: 0.8,
+      w: 1.5,
+      depth: -1.5,
       color: [0.4, 0.4, 1, 1] // blue
     });
   </script>

@@ -22,14 +22,14 @@ export default class WebGLBox {
     // create some attribute data
     const data = new Float32Array([
       // triangle 1
-      settings.left, settings.bottom, settings.depth,
-      settings.right, settings.bottom, settings.depth,
-      settings.left, settings.top, settings.depth,
+      settings.left, settings.bottom, settings.depth, settings.w,
+      settings.right, settings.bottom, settings.depth, settings.w,
+      settings.left, settings.top, settings.depth, settings.w,
 
       // triangle 2
-      settings.left, settings.top, settings.depth,
-      settings.right, settings.bottom, settings.depth,
-      settings.right, settings.top, settings.depth
+      settings.left, settings.top, settings.depth, settings.w,
+      settings.right, settings.bottom, settings.depth, settings.w,
+      settings.right, settings.top, settings.depth, settings.w
     ]);
 
     // use Webgl to draw this onto the screen
@@ -42,7 +42,7 @@ export default class WebGLBox {
 
     // setup the pointer to our attribute data
     gl.enableVertexAttribArray(this.positionLocation);
-    gl.vertexAttribPointer(this.positionLocation, 3, gl.FLOAT, false, 0, 0);
+    gl.vertexAttribPointer(this.positionLocation, 4, gl.FLOAT, false, 0, 0);
 
     // setup the color uniform that will be shared across all triangles
     gl.uniform4fv(this.colorLocaiton, settings.color);
