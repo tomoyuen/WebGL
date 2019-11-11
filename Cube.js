@@ -1,40 +1,30 @@
 import MDN from './MDN.js';
+import Program from './Program.js';
+import Renderer from './Renderer.js';
 
 export default class CubeDemo {
   constructor() {
     // Prep the canvas
-    this.canvas = document.getElementById('canvas');
-    this.canvas.width = window.innerWidth;
-    this.canvas.height = window.innerHeight;
+    const renderer = this.renderer = new Renderer({
+      canvas: document.getElementById('canvas'),
+      width: window.innerWidth,
+      height: window.innerHeight
+    });
 
     // Grab a context
-    this.gl = MDN.createContext(this.canvas);
+    const gl = this.gl = renderer.gl;
 
     this.transforms = {}; // all of the matrix tranforms
-    this.locations = {}; // all of the shader locations
 
     // get the rest going
-    this.buffers = MDN.createBuffersForCube(this.gl, MDN.createCubeData());
-    this.webglProgram = this.setupProgram();
-  }
-  setupProgram() {
-    const gl = this.gl;
+    this.buffers = MDN.createBuffersForCube(gl, MDN.createCubeData());
+    const program = new Program(gl, {
+      vertex: document.getElementById('vertex-shader').innerHTML,
+      fragment: document.getElementById('fragment-shader').innerHTML
+    });
 
-    // setup a webgl program
-    const webglProgram = MDN.createWebGLProgramFromIds(gl, 'vertex-shader', 'fragment-shader');
-    gl.useProgram(webglProgram);
-
-    // save the attribute and uniform locations
-    this.locations.model = gl.getUniformLocation(webglProgram, 'model');
-    this.locations.view = gl.getUniformLocation(webglProgram, 'view');
-    this.locations.projection = gl.getUniformLocation(webglProgram, 'projection');
-    this.locations.position = gl.getAttribLocation(webglProgram, 'position');
-    this.locations.color = gl.getAttribLocation(webglProgram, 'color');
-
-    // tell webgl to test the depth when drawing
-    gl.enable(gl.DEPTH_TEST);
-
-    return webglProgram;
+    this.locations = program.locations;
+    this.program = program.program;
   }
   computePerspectiveMatrix() {
     const fieldOfViewInRadians = Math.PI * 0.5;

@@ -330,6 +330,7 @@ export default {
   scaleMatrix,
   perspectiveMatrix,
   orthographicMatrix,
+  createWebGLProgram,
   createWebGLProgramFromIds,
   createContext
 };
